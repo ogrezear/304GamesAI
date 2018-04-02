@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Xml.Xsl;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
+    public Transform Player;
     public LayerMask BlockedMask;
     public Vector3 GridWorldSize;
     public float NodeRadius;
@@ -50,12 +49,59 @@ public class Grid : MonoBehaviour
                         walkable = false;
                     }
 
-                    _grid[x, y, z] = new Node(walkable, worldPoint);
+                    _grid[x, y, z] = new Node(walkable, worldPoint,x,y,z);
                 }
             }
         }
     }
 
+    public Node NodeFromWorldPosition(Vector3 worldPosition)
+    {
+        var percentX = (worldPosition.x ) / GridWorldSize.x;
+        var percentY = (worldPosition.z ) / GridWorldSize.y;
+        var percentZ = (worldPosition.y ) / GridWorldSize.z;
+        percentX = Mathf.Clamp01(percentX);
+        percentY = Mathf.Clamp01(percentY);
+        percentZ = Mathf.Clamp01(percentZ);
+
+        int x = Mathf.RoundToInt((_gridSizeX) * percentX);
+        int y = Mathf.RoundToInt((_gridSizeY) * percentY);
+        int z = Mathf.RoundToInt((_gridSizeZ) * percentZ);
+
+        return _grid[x, y, z];
+    }
+
+    public List<Node> GetNeighbours(Node node)
+    {
+        List<Node> neighbours = new List<Node>();
+
+        for (int x = -1; x <= 1 ; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                for (int z = -1; z <= 1; z++)
+                {
+                    if (x==0 && y==0 && z==0)
+                    {
+                        continue;
+                    }
+
+                    int checkX = node.gridX + x;
+                    int checkY = node.gridY + y;
+                    int checkZ = node.gridZ + z;
+
+                    if (checkX >= 0 && checkX <_gridSizeX && checkY >= 0 && checkY < _gridSizeY && checkZ >= 0 && checkZ < _gridSizeZ)
+                    {
+                        neighbours.Add(_grid[checkX,checkY,checkZ]);
+                    }
+                }
+            }
+        }
+
+        return neighbours;
+    }
+
+    public List<Node> path;
 
     void OnDrawGizmos()
     {
@@ -63,10 +109,24 @@ public class Grid : MonoBehaviour
 
         if (_grid != null)
         {
+            Node playerNode = NodeFromWorldPosition(Player.position);
             foreach (var node in _grid)
             {
                 Gizmos.color = (node.Walkable) ? Color.green : Color.red;
-                Gizmos.DrawSphere(node.WorldPosition, 0.1f);
+
+                if (path != null)
+                {
+                    if (path.Contains(node))
+                    {
+                        Gizmos.color = Color.black;
+                    }
+                }
+
+                if (playerNode == node)
+                {
+                    Gizmos.color = Color.yellow;
+                }
+                Gizmos.DrawSphere(node.WorldPosition - new Vector3(0,0,0), 0.1f);
             }
         }
     }
