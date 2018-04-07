@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Pathfinding : MonoBehaviour
+public class PathfindingAstar : MonoBehaviour
 {
     public GameObject seeker, target;
 
@@ -32,23 +32,24 @@ public class Pathfinding : MonoBehaviour
             FindPath(seeker.transform.position, target.transform.position);
             move = true;
         }
-
-        if (!move && canStart)
-        {
-            if (cachedSeekerPos != seeker.transform.position)
-            {
-                cachedSeekerPos = seeker.transform.position;
-                FindPath(seeker.transform.position, target.transform.position);
-            }
-            if (cachedTargetPos != target.transform.position)
-            {
-                cachedTargetPos = target.transform.position;
-                FindPath(seeker.transform.position, target.transform.position);
-            }
-        }
+        
+        // Uncomment this if you wish to update the path real time, while you are moving the sheep around;
+        //if (!move && canStart)
+        //{
+        //    if (cachedSeekerPos != seeker.transform.position)
+        //    {
+        //        cachedSeekerPos = seeker.transform.position;
+        //        FindPath(seeker.transform.position, target.transform.position);
+        //    }
+        //    if (cachedTargetPos != target.transform.position)
+        //    {
+        //        cachedTargetPos = target.transform.position;
+        //        FindPath(seeker.transform.position, target.transform.position);
+        //    }
+        //}
         else
         {
-             AnimatePath();
+            AnimatePath();
         }
     }
 
