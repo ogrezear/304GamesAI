@@ -32,6 +32,11 @@ public class Grid : MonoBehaviour
         RenderGrid();
     }
 
+    public int MaxSize
+    {
+        get { return _gridSizeX * _gridSizeY * _gridSizeZ; }
+    }
+
     void Update()
     {
         UpdateGridColors();
@@ -126,7 +131,10 @@ public class Grid : MonoBehaviour
         {
             if (AINode == node)
             {
-                node.Mesh.GetComponent<Renderer>().material = PositionMaterial;
+                if (node.Terrain)
+                {
+                    node.Mesh.GetComponent<Renderer>().material = PositionMaterial;
+                }
             }
         }
     }

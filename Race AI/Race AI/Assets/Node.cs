@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Node
+public class Node : IHeapItem<Node>
 {
 
     [HideInInspector]
@@ -28,6 +28,8 @@ public class Node
     public Object Obj;
     public GameObject Mesh;
 
+    private int _heapIndex;
+
     public Node(bool walkable, bool terrain,  Vector3 worldPos, int gridX, int gridY, int gridZ, Object obj)
     {
         Walkable = walkable;
@@ -44,5 +46,28 @@ public class Node
     public float FCost
     {
         get { return GCost + HCost; }
+    }
+
+    public int CompareTo(Node nodeToCompare)
+    {
+        var compare = FCost.CompareTo(nodeToCompare.FCost);
+        if (compare == 0)
+        {
+            compare = HCost.CompareTo(nodeToCompare.HCost);
+        }
+        return -compare;
+    }
+
+    public int HeapIndex
+    {
+        get
+        {
+            return _heapIndex;
+            
+        }
+        set
+        {
+            _heapIndex = value;
+        }
     }
 }

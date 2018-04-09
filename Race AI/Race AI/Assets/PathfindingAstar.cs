@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 
 public class PathfindingAstar : MonoBehaviour
 {
@@ -120,29 +122,37 @@ public class PathfindingAstar : MonoBehaviour
 
     private void FindPath(Vector3 startPos, Vector3 targetPos)
     {
+        var sw = new Stopwatch();
+        sw.Start();
         var startNode = _grid.NodeFromWorldPosition(startPos);
         var targetNode = _grid.NodeFromWorldPosition(targetPos);
 
-        var openSet = new List<Node>();
+        var openSet = new Heap<Node>(_grid.MaxSize);
         var closedSet = new HashSet<Node>();
 
         openSet.Add(startNode);
 
         while (openSet.Count > 0)
         {
-            var currentNode = openSet[0];
-            for (var i = 1; i < openSet.Count; i++)
-            {
-                if (openSet[i].FCost < currentNode.FCost || openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost)
-                {
-                    currentNode = openSet[i];
-                }
-            }
-            openSet.Remove(currentNode);
+            var currentNode = openSet.RemoveFirst(); // oprimised (0ms)
+
+            // Old and unoptimised (2ms)
+            //var currentNode = openSet[0];
+            //for (var i = 1; i < openSet.Count; i++)
+            //{
+            //    if (openSet[i].FCost < currentNode.FCost || openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost)
+            //    {
+            //        currentNode = openSet[i];
+            //    }
+            //}
+            //openSet.Remove(currentNode);
+
             closedSet.Add(currentNode);
 
             if (currentNode == targetNode)
             {
+                sw.Stop();
+                Debug.Log("Path found in: " + sw.ElapsedMilliseconds + "ms");
                 RetracePath(startNode, targetNode);
                 return;
             }
