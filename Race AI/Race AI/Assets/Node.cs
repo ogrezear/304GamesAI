@@ -12,37 +12,37 @@ public class Node
     [HideInInspector]
     public Vector3 WorldPosition;
     [HideInInspector]
-    public int gridX;
+    public int GridX;
     [HideInInspector]
-    public int gridY;
+    public int GridY;
     [HideInInspector]
-    public int gridZ;
+    public int GridZ;
 
     [HideInInspector]
-    public float gCost;
+    public float GCost;
     [HideInInspector]
-    public float hCost;
+    public float HCost;
     [HideInInspector]
-    public Node parent;
+    public Node Parent;
 
-    public Object obj;
-    public GameObject mesh;
+    public Object Obj;
+    public GameObject Mesh;
 
-    public Node(bool walkable, bool _terrain,  Vector3 worldPos, int _gridX, int _gridY, int _gridZ, Object _obj)
+    public Node(bool walkable, bool terrain,  Vector3 worldPos, int gridX, int gridY, int gridZ, Object obj)
     {
         Walkable = walkable;
-        Terrain = _terrain;
+        Terrain = terrain;
         WorldPosition = worldPos;
-        gridX = _gridX;
-        gridY = _gridY;
-        gridZ = _gridZ;
+        GridX = gridX;
+        GridY = gridY;
+        GridZ = gridZ;
 
-        obj = _obj;
+        Obj = obj;
        
     }
 
-    public float fCost
+    public float FCost
     {
-        get { return gCost + hCost; }
+        get { return GCost + HCost; }
     }
 }

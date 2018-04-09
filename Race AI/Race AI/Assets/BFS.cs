@@ -5,26 +5,25 @@ using UnityEngine.SceneManagement;
 
 public class BFS : MonoBehaviour {
 
-    private Grid grid;
-    public GameObject seeker, target;
+    private Grid _grid;
+    public GameObject Seeker, Target;
 
-    private bool move = false, canStart = true;
-    private Vector3 cachedSeekerPos;
-    private Vector3 cachedTargetPos;
+    private bool _move;
+    private bool _canStart = true;
+    private Vector3 _cachedSeekerPos;
+    private Vector3 _cachedTargetPos;
 
-    // Use this for initialization
     void Start ()
     {
-        cachedSeekerPos = seeker.transform.position;
-        cachedTargetPos = target.transform.position;
+        _cachedSeekerPos = Seeker.transform.position;
+        _cachedTargetPos = Target.transform.position;
     }
 	
-	// Update is called once per frame
 	void Update () {
 	    if (Input.GetKeyDown(KeyCode.B))
 	    {
-	        FindShortestPathBFS(seeker.transform.position, target.transform.position);
-	        move = true;
+	        FindShortestPathBfs(Seeker.transform.position, Target.transform.position);
+	        _move = true;
 	    }
 
         // Uncomment this if you wish to update the path real time, while you are moving the sheep around;
@@ -49,61 +48,61 @@ public class BFS : MonoBehaviour {
 
     void AnimatePath()
     {
-        move = false;
-        canStart = false;
-        Vector3 currentPos = seeker.transform.position;
-        seeker.GetComponent<Animator>().speed = 0.9f;
-        if (grid.path != null)
+        _move = false;
+        _canStart = false;
+        var currentPos = Seeker.transform.position;
+        Seeker.GetComponent<Animator>().speed = 0.9f;
+        if (_grid.Path != null)
         {
-            StartCoroutine(UpdatePosition(currentPos, grid.path[0], 0));
+            StartCoroutine(UpdatePosition(currentPos, _grid.Path[0], 0));
         }
     }
 
     IEnumerator UpdatePosition(Vector3 currentPos, Node n, int index)
     {
-        float t = 0.0f;
-        Vector3 correctedPathPos = new Vector3(n.WorldPosition.x, n.WorldPosition.y - 0.487f, n.WorldPosition.z);
-        var distance = GetDistance(grid.NodeFromWorldPosition(currentPos), n);
-        Debug.Log(distance.ToString());
+        var t = 0.0f;
+        var correctedPathPos = new Vector3(n.WorldPosition.x, n.WorldPosition.y - 0.487f, n.WorldPosition.z);
+        var distance = GetDistance(_grid.NodeFromWorldPosition(currentPos), n);
+        //Debug.Log(distance.ToString());
 
 
 
         if (distance == 2)
         {
-            seeker.GetComponent<Animator>().speed = 0.8f;
+            Seeker.GetComponent<Animator>().speed = 0.8f;
         }
         else if (distance == 1)
         {
-            seeker.GetComponent<Animator>().speed = 1.2f;
+            Seeker.GetComponent<Animator>().speed = 1.2f;
         }
         else if (distance == 3)
         {
-            seeker.GetComponent<Animator>().speed = 0.6f;
+            Seeker.GetComponent<Animator>().speed = 0.6f;
         }
 
         while (t < 1.0f)
         {
 
-            seeker.transform.rotation = Quaternion.Lerp(seeker.transform.rotation, Quaternion.LookRotation(-(seeker.transform.position - correctedPathPos)), t);
+            Seeker.transform.rotation = Quaternion.Lerp(Seeker.transform.rotation, Quaternion.LookRotation(-(Seeker.transform.position - correctedPathPos)), t);
             if (t == 0.0f)
             {
-                seeker.GetComponent<Animator>().SetTrigger("jump");
+                Seeker.GetComponent<Animator>().SetTrigger("jump");
             }
-            seeker.transform.position = Vector3.Lerp(currentPos, correctedPathPos, t);
+            Seeker.transform.position = Vector3.Lerp(currentPos, correctedPathPos, t);
             t += Time.deltaTime / distance;
             yield return null;
 
         }
-        seeker.transform.position = correctedPathPos;
+        Seeker.transform.position = correctedPathPos;
         currentPos = correctedPathPos;
 
         index++;
-        if (index < grid.path.Count)
-            StartCoroutine(UpdatePosition(currentPos, grid.path[index], index));
+        if (index < _grid.Path.Count)
+            StartCoroutine(UpdatePosition(currentPos, _grid.Path[index], index));
         else
         {
-            canStart = true;
-            Debug.Log("finish");
+            _canStart = true;
+            //Debug.Log("finish");
             yield return new WaitForSeconds(1);
             SceneManager.LoadScene(1);
             yield return null;
@@ -113,54 +112,52 @@ public class BFS : MonoBehaviour {
 
     void Awake()
     {
-        grid = GetComponent<Grid>();
+        _grid = GetComponent<Grid>();
     }
 
     //Breadth first search of graph.
     //Populates IList<Vector3> path with a valid solution to the goalPosition.
-    public void FindShortestPathBFS(Vector3 startPosition, Vector3 goalPosition)
+    public void FindShortestPathBfs(Vector3 startPosition, Vector3 goalPosition)
     {
-        Queue<Node> queue = new Queue<Node>();
-        List<Node> exploredNodes = new List<Node>();
+        var queue = new Queue<Node>();
+        var exploredNodes = new List<Node>();
 
-        Node startNode = grid.NodeFromWorldPosition(startPosition);
-        Node targetNode = grid.NodeFromWorldPosition(goalPosition);
+        var startNode = _grid.NodeFromWorldPosition(startPosition);
+        var targetNode = _grid.NodeFromWorldPosition(goalPosition);
 
         queue.Enqueue(startNode);
         IDictionary<Node, Node> nodeParents = new Dictionary<Node, Node>();
 
         while (queue.Count != 0)
         {
-            Node currentNode = queue.Dequeue();
+            var currentNode = queue.Dequeue();
             if (currentNode == targetNode)
             {
                 RetracePath(startNode, targetNode);
                 return;
             }
 
-            IList<Node> nodes = GetWalkableNodes(currentNode);
+            var nodes = GetWalkableNodes(currentNode);
 
-            foreach (Node node in nodes)
+            foreach (var node in nodes)
             {
-                if (!exploredNodes.Contains(node))
-                {
-                    //Mark the node as explored
-                    exploredNodes.Add(node);
+                if (exploredNodes.Contains(node)) continue;
+                //Mark the node as explored
+                exploredNodes.Add(node);
 
-                    //Store a reference to the previous node
-                    node.parent = currentNode;
-                    nodeParents.Add(node, currentNode);
+                //Store a reference to the previous node
+                node.Parent = currentNode;
+                nodeParents.Add(node, currentNode);
 
-                    //Add this to the queue of nodes to examine
-                    queue.Enqueue(node);
-                }
+                //Add this to the queue of nodes to examine
+                queue.Enqueue(node);
             }
         }
     }
 
-    private IList<Node> GetWalkableNodes(Node currentNode)
+    private IEnumerable<Node> GetWalkableNodes(Node currentNode)
     {
-        var neighours = grid.GetNeighbours(currentNode);
+        var neighours = _grid.GetNeighbours(currentNode);
         var walkableNeighours = new List<Node>();
         foreach (var neighour in neighours)
         {
@@ -173,27 +170,27 @@ public class BFS : MonoBehaviour {
         return walkableNeighours;
     }
 
-    void RetracePath(Node startNode, Node endNode)
+    private void RetracePath(Node startNode, Node endNode)
     {
-        List<Node> path = new List<Node>();
-        Node currentNode = endNode;
+        var path = new List<Node>();
+        var currentNode = endNode;
 
         while (currentNode != startNode)
         {
             path.Add(currentNode);
-            currentNode = currentNode.parent;
+            currentNode = currentNode.Parent;
         }
 
         path.Reverse();
 
-        grid.path = path;
+        _grid.Path = path;
     }
 
-    float GetDistance(Node nodeA, Node nodeB)
+    private static float GetDistance(Node nodeA, Node nodeB)
     {
-        float dstX = nodeA.gridX - nodeB.gridX;
-        float dstY = nodeA.gridY - nodeB.gridY;
-        float dstZ = nodeA.gridZ - nodeB.gridZ;
+        float dstX = nodeA.GridX - nodeB.GridX;
+        float dstY = nodeA.GridY - nodeB.GridY;
+        float dstZ = nodeA.GridZ - nodeB.GridZ;
 
         return dstX * dstX + dstY * dstY + dstZ * dstZ;
     }

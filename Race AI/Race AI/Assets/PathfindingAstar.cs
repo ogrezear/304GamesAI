@@ -6,31 +6,32 @@ using UnityEngine.SceneManagement;
 
 public class PathfindingAstar : MonoBehaviour
 {
-    public GameObject seeker, target;
+    public GameObject Seeker, Target;
 
-    private Grid grid;
+    private Grid _grid;
 
-    private bool move = false, canStart = true;
-    private Vector3 cachedSeekerPos;
-    private Vector3 cachedTargetPos;
+    private bool _move;
+    private bool _canStart = true;
+    private Vector3 _cachedSeekerPos;
+    private Vector3 _cachedTargetPos;
 
     void Awake()
     {
-        grid = GetComponent<Grid>();
+        _grid = GetComponent<Grid>();
     }
 
     void Start()
     {
-        cachedSeekerPos = seeker.transform.position;
-        cachedTargetPos = target.transform.position;
+        _cachedSeekerPos = Seeker.transform.position;
+        _cachedTargetPos = Target.transform.position;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            FindPath(seeker.transform.position, target.transform.position);
-            move = true;
+            FindPath(Seeker.transform.position, Target.transform.position);
+            _move = true;
         }
         
         // Uncomment this if you wish to update the path real time, while you are moving the sheep around;
@@ -53,63 +54,63 @@ public class PathfindingAstar : MonoBehaviour
         }
     }
 
-    void AnimatePath()
+    private void AnimatePath()
     {
-        move = false;
-        canStart = false;
-        Vector3 currentPos = seeker.transform.position;
-        seeker.GetComponent<Animator>().speed = 0.9f;
-        if (grid.path != null)
+        _move = false;
+        _canStart = false;
+        var currentPos = Seeker.transform.position;
+        Seeker.GetComponent<Animator>().speed = 0.9f;
+        if (_grid.Path != null)
         {
-            StartCoroutine(UpdatePosition(currentPos, grid.path[0], 0));
+            StartCoroutine(UpdatePosition(currentPos, _grid.Path[0], 0));
         }
     }
 
-    IEnumerator UpdatePosition(Vector3 currentPos, Node n, int index)
+    private IEnumerator UpdatePosition(Vector3 currentPos, Node n, int index)
     {
-        float t = 0.0f;
-        Vector3 correctedPathPos = new Vector3(n.WorldPosition.x, n.WorldPosition.y - 0.487f, n.WorldPosition.z);
-        var distance = GetDistance(grid.NodeFromWorldPosition(currentPos), n);
-        Debug.Log(distance.ToString());
+        var t = 0.0f;
+        var correctedPathPos = new Vector3(n.WorldPosition.x, n.WorldPosition.y - 0.487f, n.WorldPosition.z);
+        var distance = GetDistance(_grid.NodeFromWorldPosition(currentPos), n);
+        //Debug.Log(distance.ToString());
 
       
 
         if (distance == 2)
         {
-            seeker.GetComponent<Animator>().speed = 0.8f;
+            Seeker.GetComponent<Animator>().speed = 0.8f;
         }
         else if (distance == 1)
         {
-            seeker.GetComponent<Animator>().speed = 1.2f;
+            Seeker.GetComponent<Animator>().speed = 1.2f;
         }
         else if (distance == 3)
         {
-            seeker.GetComponent<Animator>().speed = 0.6f;
+            Seeker.GetComponent<Animator>().speed = 0.6f;
         }
 
         while (t < 1.0f )
         {
             
-            seeker.transform.rotation = Quaternion.Lerp(seeker.transform.rotation ,Quaternion.LookRotation(-(seeker.transform.position - correctedPathPos)),t);
+            Seeker.transform.rotation = Quaternion.Lerp(Seeker.transform.rotation ,Quaternion.LookRotation(-(Seeker.transform.position - correctedPathPos)),t);
             if (t==0.0f)
             {
-                seeker.GetComponent<Animator>().SetTrigger("jump");
+                Seeker.GetComponent<Animator>().SetTrigger("jump");
             }
-            seeker.transform.position = Vector3.Lerp(currentPos, correctedPathPos, t);
+            Seeker.transform.position = Vector3.Lerp(currentPos, correctedPathPos, t);
             t += Time.deltaTime/distance;
             yield return null;
 
         }
-        seeker.transform.position = correctedPathPos;
+        Seeker.transform.position = correctedPathPos;
         currentPos = correctedPathPos;
 
         index++;
-        if (index < grid.path.Count)
-            StartCoroutine(UpdatePosition(currentPos, grid.path[index], index));
+        if (index < _grid.Path.Count)
+            StartCoroutine(UpdatePosition(currentPos, _grid.Path[index], index));
         else
         {
-            canStart = true;
-            Debug.Log("finish");
+            _canStart = true;
+            //Debug.Log("finish");
             yield return new WaitForSeconds(1);
             SceneManager.LoadScene(1);
             yield return null;
@@ -117,22 +118,22 @@ public class PathfindingAstar : MonoBehaviour
 
     }
 
-    void FindPath(Vector3 startPos, Vector3 targetPos)
+    private void FindPath(Vector3 startPos, Vector3 targetPos)
     {
-        Node startNode = grid.NodeFromWorldPosition(startPos);
-        Node targetNode = grid.NodeFromWorldPosition(targetPos);
+        var startNode = _grid.NodeFromWorldPosition(startPos);
+        var targetNode = _grid.NodeFromWorldPosition(targetPos);
 
-        List<Node> openSet = new List<Node>();
-        HashSet<Node> closedSet = new HashSet<Node>();
+        var openSet = new List<Node>();
+        var closedSet = new HashSet<Node>();
 
         openSet.Add(startNode);
 
         while (openSet.Count > 0)
         {
-            Node currentNode = openSet[0];
-            for (int i = 1; i < openSet.Count; i++)
+            var currentNode = openSet[0];
+            for (var i = 1; i < openSet.Count; i++)
             {
-                if (openSet[i].fCost < currentNode.fCost || openSet[i].fCost == currentNode.fCost && openSet[i].hCost < currentNode.hCost)
+                if (openSet[i].FCost < currentNode.FCost || openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost)
                 {
                     currentNode = openSet[i];
                 }
@@ -146,50 +147,48 @@ public class PathfindingAstar : MonoBehaviour
                 return;
             }
 
-            foreach (var neighbour in grid.GetNeighbours(currentNode))
+            foreach (var neighbour in _grid.GetNeighbours(currentNode))
             {
                 if (!neighbour.Walkable || closedSet.Contains(neighbour))
                 {
                     continue;
                 }
 
-                float newMovementCostToNeighbour = (currentNode.gCost + GetDistance(currentNode, neighbour));
-                if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
-                {
-                    neighbour.gCost = newMovementCostToNeighbour;
-                    neighbour.hCost = GetDistance(neighbour, targetNode);
-                    neighbour.parent = currentNode;
+                var newMovementCostToNeighbour = (currentNode.GCost + GetDistance(currentNode, neighbour));
+                if (!(newMovementCostToNeighbour < neighbour.GCost) && openSet.Contains(neighbour)) continue;
+                neighbour.GCost = newMovementCostToNeighbour;
+                neighbour.HCost = GetDistance(neighbour, targetNode);
+                neighbour.Parent = currentNode;
 
-                    if (!openSet.Contains(neighbour))
-                    {
-                        openSet.Add(neighbour);
-                    }
+                if (!openSet.Contains(neighbour))
+                {
+                    openSet.Add(neighbour);
                 }
             }
         }
     }
 
-    void RetracePath(Node startNode, Node endNode)
+    public void RetracePath(Node startNode, Node endNode)
     {
-        List<Node> path = new List<Node>();
-        Node currentNode = endNode;
+        var path = new List<Node>();
+        var currentNode = endNode;
 
         while (currentNode != startNode)
         {
             path.Add(currentNode);
-            currentNode = currentNode.parent;
+            currentNode = currentNode.Parent;
         }
 
         path.Reverse();
 
-        grid.path = path;
+        _grid.Path = path;
     }
 
-    float GetDistance(Node nodeA, Node nodeB)
+    private static float GetDistance(Node nodeA, Node nodeB)
     {
-        float dstX = nodeA.gridX - nodeB.gridX;
-        float dstY = nodeA.gridY - nodeB.gridY;
-        float dstZ = nodeA.gridZ - nodeB.gridZ;
+        float dstX = nodeA.GridX - nodeB.GridX;
+        float dstY = nodeA.GridY - nodeB.GridY;
+        float dstZ = nodeA.GridZ - nodeB.GridZ;
 
         return dstX * dstX + dstY * dstY + dstZ * dstZ;
     }
