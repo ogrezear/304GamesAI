@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
+//using UnityEditor;
+//using UnityEditor;
 using UnityEngine;
 
 public class Grid : MonoBehaviour
@@ -89,7 +90,7 @@ public class Grid : MonoBehaviour
                 for (var z = 0; z < _gridSizeZ; z++)
                 {
                     if (!_grid[x, y, z].Terrain) continue;
-                    _grid[x, y, z].Mesh = PrefabUtility.InstantiatePrefab(Obj) as GameObject;
+                    _grid[x, y, z].Mesh = Instantiate(Obj, new Vector3(0, 0, 0), Quaternion.identity) as GameObject; //PrefabUtility.InstantiatePrefab(Obj) as GameObject;
                     var mesh = _grid[x, y, z].Mesh;
                     if (mesh != null)
                         mesh.transform.position = _grid[x, y, z].WorldPosition;

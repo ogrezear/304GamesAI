@@ -20,10 +20,9 @@ public class BFS : MonoBehaviour {
     }
 	
 	void Update () {
-	    if (Input.GetKeyDown(KeyCode.B))
+	    if (Input.GetKeyDown(KeyCode.Space))
 	    {
-	        FindShortestPathBfs(Seeker.transform.position, Target.transform.position);
-	        _move = true;
+	        StartAI();
 	    }
 
         // Uncomment this if you wish to update the path real time, while you are moving the sheep around;
@@ -44,6 +43,12 @@ public class BFS : MonoBehaviour {
         {
             AnimatePath();
         }
+    }
+
+    public void StartAI()
+    {
+        FindShortestPathBfs(Seeker.transform.position, Target.transform.position);
+        _move = true;
     }
 
     void AnimatePath()
@@ -104,7 +109,7 @@ public class BFS : MonoBehaviour {
             _canStart = true;
             //Debug.Log("finish");
             yield return new WaitForSeconds(1);
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene(5);
             yield return null;
         }
 

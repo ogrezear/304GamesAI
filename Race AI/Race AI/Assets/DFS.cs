@@ -20,32 +20,36 @@ public class DFS : MonoBehaviour {
     }
 	
 	void Update () {
-	    if (Input.GetKeyDown(KeyCode.D))
+	    if (Input.GetKeyDown(KeyCode.Space))
 	    {
-	        FindShortestPathDFS(Seeker.transform.position, Target.transform.position);
-	        _move = true;
+	        StartAI();
 	    }
 
         //Uncomment this if you wish to update the path real time, while you are moving the sheep around;
-        if (!_move && _canStart)
-        {
-            if (_cachedSeekerPos != Seeker.transform.position)
-            {
-                _cachedSeekerPos = Seeker.transform.position;
-                FindShortestPathDFS(Seeker.transform.position, Target.transform.position);
-            }
-            if (_cachedTargetPos != Target.transform.position)
-            {
-                _cachedTargetPos = Target.transform.position;
-                FindShortestPathDFS(Seeker.transform.position, Target.transform.position);
-            }
-        }
+        //if (!_move && _canStart)
+        //{
+        //    if (_cachedSeekerPos != Seeker.transform.position)
+        //    {
+        //        _cachedSeekerPos = Seeker.transform.position;
+        //        FindShortestPathDFS(Seeker.transform.position, Target.transform.position);
+        //    }
+        //    if (_cachedTargetPos != Target.transform.position)
+        //    {
+        //        _cachedTargetPos = Target.transform.position;
+        //        FindShortestPathDFS(Seeker.transform.position, Target.transform.position);
+        //    }
+        //}
         else
         {
             AnimatePath();
         }
     }
 
+    public void StartAI()
+    {
+        FindShortestPathDFS(Seeker.transform.position, Target.transform.position);
+        _move = true;
+    }
     void AnimatePath()
     {
         _move = false;
@@ -104,7 +108,7 @@ public class DFS : MonoBehaviour {
             _canStart = true;
             //Debug.Log("finish");
             yield return new WaitForSeconds(1);
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene(8);
             yield return null;
         }
 

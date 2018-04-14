@@ -15,8 +15,23 @@ public class MenuController : MonoBehaviour {
 
     public void StartGame()
     {
+        SceneManager.LoadScene(1);
+    }
 
-        SceneManager.LoadScene(0);
+    public void Astar()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    public void BFS()
+    {
+        SceneManager.LoadScene(4);
+    }
+
+    public void DFS()
+    {
+
+        SceneManager.LoadScene(7);
     }
 
     public void QuitGame()
